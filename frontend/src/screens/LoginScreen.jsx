@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { Form, Button } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLoginMutation } from '../slices/usersApiSlice';
@@ -21,7 +21,13 @@ const LoginScreen = () => {
 
   useEffect(() => {
     if (userInfo) {
-      navigate('/');
+      if (userInfo.role === 'admin') {
+        navigate('/admin/userlist');
+      } else if (userInfo.role === 'doctor' || userInfo.role === 'doktor' || userInfo.role === 'läkare') {
+        navigate('/appointments'); // Redirection directe vers les rendez-vous pour les médecins
+      } else {
+        navigate('/prescriptions');
+      }
     }
   }, [navigate, userInfo]);
 
@@ -30,34 +36,43 @@ const LoginScreen = () => {
     try {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials({ ...res }));
-      navigate('/');
+      
+      if (res.role === 'admin') {
+        navigate('/admin/userlist');
+      } else if (res.role === 'doctor' || res.role === 'doktor' || res.role === 'läkare') {
+        navigate('/appointments');
+      } else {
+        navigate('/prescriptions');
+      }
     } catch (err) {
-      toast.error(err?.data?.message || err.error);
+      toast.error(err?.data?.message || err.error || 'Échec de la connexion');
     }
   };
 
   return (
     <FormContainer>
-      <h1>Sign In</h1>
+      <h1>Se connecter</h1>
 
       <Form onSubmit={submitHandler}>
         <Form.Group className='my-2' controlId='email'>
-          <Form.Label>Email Address</Form.Label>
+          <Form.Label>Adresse e-mail</Form.Label>
           <Form.Control
             type='email'
-            placeholder='Enter email'
+            placeholder='Entrez votre e-mail'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           ></Form.Control>
         </Form.Group>
 
         <Form.Group className='my-2' controlId='password'>
-          <Form.Label>Password</Form.Label>
+          <Form.Label>Mot de passe</Form.Label>
           <Form.Control
             type='password'
-            placeholder='Enter password'
+            placeholder='Entrez votre mot de passe'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           ></Form.Control>
         </Form.Group>
 
@@ -67,17 +82,11 @@ const LoginScreen = () => {
           variant='primary'
           className='mt-3'
         >
-          Sign In
+          {isLoading ? 'Connexion en cours...' : 'Se connecter'}
         </Button>
       </Form>
 
       {isLoading && <Loader />}
-
-      <Row className='py-3'>
-        <Col>
-          New Customer? <Link to='/register'>Register</Link>
-        </Col>
-      </Row>
     </FormContainer>
   );
 };

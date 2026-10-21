@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import Loader from '../components/Loader';
-// import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRegisterMutation } from '../slices/usersApiSlice';
@@ -14,6 +13,7 @@ const RegisterScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('doctor'); // Valeur par défaut : médecin
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -32,62 +32,81 @@ const RegisterScreen = () => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error('Les mots de passe ne correspondent pas');
     } else {
       try {
-        const res = await register({ name, email, password }).unwrap();
+        // Envoi du rôle à la mutation backend
+        const res = await register({ name, email, password, role }).unwrap();
         dispatch(setCredentials({ ...res }));
         navigate('/');
       } catch (err) {
-        toast.error(err?.data?.message || err.error);
+        toast.error(err?.data?.message || err.error || 'Échec de l\'inscription');
       }
     }
   };
+
   return (
     <FormContainer>
-      <h1>Register</h1>
+      <h1>S'inscrire</h1>
       <Form onSubmit={submitHandler}>
         <Form.Group className='my-2' controlId='name'>
-          <Form.Label>Name</Form.Label>
+          <Form.Label>Nom complet</Form.Label>
           <Form.Control
-            type='name'
-            placeholder='Enter name'
+            type='text'
+            placeholder='Entrez votre nom'
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
           ></Form.Control>
         </Form.Group>
 
         <Form.Group className='my-2' controlId='email'>
-          <Form.Label>Email Address</Form.Label>
+          <Form.Label>Adresse e-mail</Form.Label>
           <Form.Control
             type='email'
-            placeholder='Enter email'
+            placeholder='Entrez votre e-mail'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           ></Form.Control>
+        </Form.Group>
+
+        {/* Sélection du rôle (Médecin ou Pharmacie) */}
+        <Form.Group className='my-2' controlId='role'>
+          <Form.Label>Sélectionner le rôle</Form.Label>
+          <Form.Select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          >
+            <option value='doctor'>Médecin</option>
+            <option value='pharmacist'>Pharmacie</option>
+          </Form.Select>
         </Form.Group>
 
         <Form.Group className='my-2' controlId='password'>
-          <Form.Label>Password</Form.Label>
+          <Form.Label>Mot de passe</Form.Label>
           <Form.Control
             type='password'
-            placeholder='Enter password'
+            placeholder='Entrez le mot de passe'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
-        <Form.Group className='my-2' controlId='confirmPassword'>
-          <Form.Label>Confirm Password</Form.Label>
-          <Form.Control
-            type='password'
-            placeholder='Confirm password'
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
           ></Form.Control>
         </Form.Group>
 
-        <Button type='submit' variant='primary' className='mt-3'>
-          Register
+        <Form.Group className='my-2' controlId='confirmPassword'>
+          <Form.Label>Confirmer le mot de passe</Form.Label>
+          <Form.Control
+            type='password'
+            placeholder='Confirmez le mot de passe'
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          ></Form.Control>
+        </Form.Group>
+
+        <Button type='submit' variant='primary' className='mt-3' disabled={isLoading}>
+          {isLoading ? 'Inscription en cours...' : "S'inscrire"}
         </Button>
 
         {isLoading && <Loader />}
@@ -95,7 +114,7 @@ const RegisterScreen = () => {
 
       <Row className='py-3'>
         <Col>
-          Already have an account? <Link to={`/login`}>Login</Link>
+          Vous avez déjà un compte ? <Link to={`/login`}>Se connecter</Link>
         </Col>
       </Row>
     </FormContainer>

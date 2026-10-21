@@ -16,6 +16,29 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    role: {
+      type: String,
+      required: true,
+      enum: ['doctor', 'pharmacist', 'receptionist', 'admin'],
+      default: 'doctor',
+    },
+    linkedDoctorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    phone: {
+      type: String,
+      default: '',
+    },
+    hospital: {
+      type: String,
+      default: '',
+    },
+    address: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,
@@ -30,7 +53,7 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 // Encrypt password using bcrypt
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
 
   const salt = await bcrypt.genSalt(10);

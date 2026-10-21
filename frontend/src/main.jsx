@@ -7,6 +7,10 @@ import {
   Route,
   RouterProvider,
 } from 'react-router-dom';
+import PrescriptionScreen from './screens/PrescriptionScreen.jsx';
+import PatientDetailScreen from './screens/PatientDetailScreen.jsx';
+import AppointmentsScreen from './screens/AppointmentsScreen.jsx';
+import DoctorReceptionistsScreen from './components/DoctorReceptionistsScreen'; // <-- Importerad här!
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import store from './store';
@@ -16,6 +20,8 @@ import LoginScreen from './screens/LoginScreen.jsx';
 import RegisterScreen from './screens/RegisterScreen.jsx';
 import ProfileScreen from './screens/ProfileScreen.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
+import PharmacyScreen from './screens/PharmacyScreen.jsx';
+import UserManagementScreen from './screens/UserManagementScreen.jsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -25,6 +31,13 @@ const router = createBrowserRouter(
       <Route path='/register' element={<RegisterScreen />} />
       <Route path='' element={<PrivateRoute />}>
         <Route path='/profile' element={<ProfileScreen />} />
+        <Route path='/prescriptions' element={<PrescriptionScreen />} />
+        <Route path='/patient/:personalId' element={<PatientDetailScreen />} />
+        <Route path='/patients/:personalId' element={<PatientDetailScreen />} /> {/* <-- Lägg till denna så båda fungerar! */}
+        <Route path='/appointments' element={<AppointmentsScreen />} />
+        <Route path='/receptionists' element={<DoctorReceptionistsScreen />} /> {/* <-- Ny route tillagd här! */}
+        <Route path='/pharmacy' element={<PharmacyScreen />} />
+        <Route path='/admin/userlist' element={<UserManagementScreen />} />
       </Route>
     </Route>
   )

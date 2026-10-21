@@ -25,4 +25,34 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-export { protect };
+// Middleware för att enbart tillåta läkare
+const doctorOnly = (req, res, next) => {
+  if (req.user && req.user.role === 'doctor') {
+    next();
+  } else {
+    res.status(403);
+    throw new Error('Behörighet saknas: Endast för läkare');
+  }
+};
+
+// Middleware för att enbart tillåta apotekspersonal
+const pharmacistOnly = (req, res, next) => {
+  if (req.user && req.user.role === 'pharmacist') {
+    next();
+  } else {
+    res.status(403);
+    throw new Error('Behörighet saknas: Endast för apotekspersonal');
+  }
+};
+
+// Middleware för administratörer
+const admin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(401);
+    throw new Error('Not authorized as an admin');
+  }
+};
+
+export { protect, doctorOnly, pharmacistOnly, admin };
